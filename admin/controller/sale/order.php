@@ -312,7 +312,7 @@ class ControllerSaleOrder extends Controller {
 		$order_total = $this->model_sale_order->getTotalOrders($data);
 
 		$results = $this->model_sale_order->getOrders($data);
-
+		
 		foreach ($results as $result) {
 			$action = array();
 
@@ -328,10 +328,13 @@ class ControllerSaleOrder extends Controller {
 				);
 			}
 
+			
 			$this->data['orders'][] = array(
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
+				'customer_id'      => $result['customer_id'],
 				'status'        => $result['status'],
+				'manager_id'        => $result['manager_id'],
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'date_modified' => date($this->language->get('date_format_short'), strtotime($result['date_modified'])),
@@ -339,6 +342,16 @@ class ControllerSaleOrder extends Controller {
 				'action'        => $action
 			);
 		}
+		
+		$this->load->model('user/user');
+		$data = array(
+			'sort'  => 'username',
+			'order' => 'ASC',
+			'start' => 0,
+			'limit' => 20
+		);		
+		$this->data['manager']= $this->model_user_user->getUsers($data);
+		$this->data['userInfo']= $this->model_user_user->getUser($this->user->getId());		
 
 		$this->data['heading_title'] = $this->language->get('heading_title');
 
@@ -473,6 +486,8 @@ class ControllerSaleOrder extends Controller {
 
 		$this->data['sort'] = $sort;
 		$this->data['order'] = $order;
+		
+		
 
 		$this->template = 'sale/order_list.tpl';
 		$this->children = array(
@@ -2352,7 +2367,7 @@ class ControllerSaleOrder extends Controller {
 
 	public function invoice() {
 		$this->language->load('sale/order');
-
+		$this->load->model('user/user');
 		$this->data['title'] = $this->language->get('heading_title');
 
 		if (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
@@ -2373,6 +2388,7 @@ class ControllerSaleOrder extends Controller {
 		$this->data['text_telephone'] = $this->language->get('text_telephone');
 		$this->data['text_fax'] = $this->language->get('text_fax');
 		$this->data['text_to'] = $this->language->get('text_to');
+		$this->data['entry_manager'] = $this->language->get('entry_manager');
 		$this->data['text_company_id'] = $this->language->get('text_company_id');
 		$this->data['text_tax_id'] = $this->language->get('text_tax_id');
 		$this->data['text_ship_to'] = $this->language->get('text_ship_to');
@@ -2442,7 +2458,7 @@ class ControllerSaleOrder extends Controller {
 					'{zone_code}',
 					'{country}'
 				);
-
+				
 				$replace = array(
 					'firstname' => $order_info['shipping_firstname'],
 					'lastname'  => $order_info['shipping_lastname'],
@@ -2536,7 +2552,15 @@ class ControllerSaleOrder extends Controller {
 				}
 
 				$total_data = $this->model_sale_order->getOrderTotals($order_id);
-
+				
+				
+				if((int)$order_info['manager_id']>0){
+					$manager_info= $this->model_user_user->getUser($order_info['manager_id']);
+					$manager_info=$manager_info['firstname'].' '.$manager_info['lastname'];
+				}else{
+					$manager_info=false;
+				}
+				
 				$this->data['orders'][] = array(
 					'order_id'	         => $order_id,
 					'invoice_no'         => $invoice_no,
@@ -2546,6 +2570,7 @@ class ControllerSaleOrder extends Controller {
 					'store_address'      => nl2br($store_address),
 					'store_email'        => $store_email,
 					'store_telephone'    => $store_telephone,
+					'manager_info'   	 => $manager_info,
 					'store_fax'          => $store_fax,
 					'email'              => $order_info['email'],
 					'telephone'          => $order_info['telephone'],
@@ -2566,6 +2591,56 @@ class ControllerSaleOrder extends Controller {
 		$this->template = 'sale/order_invoice.tpl';
 
 		$this->response->setOutput($this->render());
+	}
+	
+	public function changemanager(){
+		if ($this->request->server['REQUEST_METHOD'] == 'GET') {
+			$this->load->model('sale/order');
+			if($this->model_sale_order->updateManager($this->request->get)){
+				$this->load->model('user/user');
+				$this->load->model('sale/customer');
+				$this->language->load('sale/order');
+				
+				$cid=(int)$this->request->get['cid'];
+				$mid=(int)$this->request->get['mid'];			
+				
+				$manager_info= $this->model_user_user->getUser($mid);	
+				$customer_info = $this->model_sale_customer->getCustomer($cid);
+				
+				
+				$find = array('{firstname}','{lastname}','{phone}','{email}');
+				$replace = array('firstname' => '','lastname'  => '','phone'  => '','email'=>'');				
+				if(!empty($manager_info['firstname'])){
+					$replace['firstname']=$manager_info['firstname'];
+				}
+				if(!empty($manager_info['lastname'])){
+					$replace['lastname']=$manager_info['lastname'];
+				}
+				if(!empty($manager_info['phone'])){
+					$replace['phone']=$manager_info['phone'];
+				}
+				if(!empty($manager_info['email'])){
+					$replace['email']=$manager_info['email'];
+				}				
+				$text = str_replace(array("\r\n", "\r", "\n"), '', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), ' ', trim(str_replace($find,$replace, $this->config->get('config_manager_email')))));
+									
+				$subject=$this->language->get('subject_manager_email');
+				$mail = new Mail(); 
+				$mail->protocol = $this->config->get('config_mail_protocol');
+				$mail->parameter = $this->config->get('config_mail_parameter');
+				$mail->hostname = $this->config->get('config_smtp_host');
+				$mail->username = $this->config->get('config_smtp_username');
+				$mail->password = $this->config->get('config_smtp_password');
+				$mail->port = $this->config->get('config_smtp_port');
+				$mail->timeout = $this->config->get('config_smtp_timeout');
+				$mail->setTo($customer_info['email']);
+				$mail->setFrom($this->config->get('config_email'));
+				$mail->setSender('store_name');
+				$mail->setSubject(html_entity_decode($subject, ENT_QUOTES, 'UTF-8'));
+				$mail->setText(html_entity_decode($text, ENT_QUOTES, 'UTF-8'));
+				$mail->send();
+			}			
+		}
 	}
 }
 ?>

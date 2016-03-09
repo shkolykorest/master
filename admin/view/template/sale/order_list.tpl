@@ -37,6 +37,7 @@
                 <?php } else { ?>
                 <a href="<?php echo $sort_status; ?>"><?php echo $column_status; ?></a>
                 <?php } ?></td>
+			  <td class="left">Manager</td>
               <td class="right"><?php if ($sort == 'o.total') { ?>
                 <a href="<?php echo $sort_total; ?>" class="<?php echo strtolower($order); ?>"><?php echo $column_total; ?></a>
                 <?php } else { ?>
@@ -75,6 +76,7 @@
                   <?php } ?>
                   <?php } ?>
                 </select></td>
+				<td align="right"></td>
               <td align="right"><input type="text" name="filter_total" value="<?php echo $filter_total; ?>" size="4" style="text-align: right;" /></td>
               <td><input type="text" name="filter_date_added" value="<?php echo $filter_date_added; ?>" size="12" class="date" /></td>
               <td><input type="text" name="filter_date_modified" value="<?php echo $filter_date_modified; ?>" size="12" class="date" /></td>
@@ -91,6 +93,28 @@
               <td class="right"><?php echo $order['order_id']; ?></td>
               <td class="left"><?php echo $order['customer']; ?></td>
               <td class="left"><?php echo $order['status']; ?></td>
+              <td class="left">
+			  <?php if($userInfo['user_group_id']==10){?>
+				<?php foreach ($manager as $v) { ?>
+					  <?php if($v['user_group_id']!=10) continue;?>
+						 <?php if($v['user_id']==$order['manager_id']) {?>
+							<?php echo $v['firstname'].' '.$v['lastname']; ?>								
+						 <?php }?>
+					<?php } ?>
+			  <?php }else{?>
+			  <select class="order_manager" name="manager">
+                  <option data-cid="<?php echo $order['customer_id'];?>" value="0">Select manager</option>      
+					<?php foreach ($manager as $v) { ?>
+					  <?php if($v['user_group_id']!=10) continue;?>
+						 <?php if($v['user_id']==$order['manager_id']) {?>
+							<option data-cid="<?php echo $order['customer_id'];?>" value="<?php echo $v['user_id']; ?>" selected="selected"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>
+						 <?php }else{?>
+							<option data-cid="<?php echo $order['customer_id'];?>" value="<?php echo $v['user_id']; ?>"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>	
+						 <?php } ?>
+					<?php } ?>
+			  </select>	
+			  <?php }?>
+			  </td>
               <td class="right"><?php echo $order['total']; ?></td>
               <td class="left"><?php echo $order['date_added']; ?></td>
               <td class="left"><?php echo $order['date_modified']; ?></td>
@@ -181,6 +205,19 @@ $.widget('custom.catcomplete', $.ui.autocomplete, {
 			self._renderItem(ul, item);
 		});
 	}
+});
+
+$('.order_manager').change(function() {
+  var mid=$(this).val();
+  var cid=$(this).find(':selected').attr('data-cid');
+  $.ajax({
+		url: 'index.php?route=sale/order/changemanager&token=<?php echo $token; ?>&cid=' + cid+'&mid='+mid,
+			dataType: 'json',
+			success: function(json) {		
+				
+			}
+		});
+  
 });
 
 $('input[name=\'filter_customer\']').catcomplete({

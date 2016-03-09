@@ -824,6 +824,10 @@
               <td><?php echo $entry_alert_emails; ?></td>
               <td><textarea name="config_alert_emails" cols="40" rows="5"><?php echo $config_alert_emails; ?></textarea></td>
             </tr>
+			<tr>
+              <td><?php echo $entry_manager_email; ?></td>
+              <td><textarea name="config_manager_email" cols="40" rows="5"><?php echo $config_manager_email; ?></textarea></td>
+            </tr>
           </table>
         </div>
         <div id="tab-fraud">

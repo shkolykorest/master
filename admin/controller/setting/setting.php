@@ -122,6 +122,7 @@ class ControllerSettingSetting extends Controller {
 		$this->data['entry_alert_mail'] = $this->language->get('entry_alert_mail');
 		$this->data['entry_account_mail'] = $this->language->get('entry_account_mail');
 		$this->data['entry_alert_emails'] = $this->language->get('entry_alert_emails');
+		$this->data['entry_manager_email'] = $this->language->get('entry_manager_email');
 		$this->data['entry_fraud_detection'] = $this->language->get('entry_fraud_detection');
 		$this->data['entry_fraud_key'] = $this->language->get('entry_fraud_key');
 		$this->data['entry_fraud_score'] = $this->language->get('entry_fraud_score');
@@ -936,6 +937,12 @@ class ControllerSettingSetting extends Controller {
 			$this->data['config_alert_emails'] = $this->request->post['config_alert_emails'];
 		} else {
 			$this->data['config_alert_emails'] = $this->config->get('config_alert_emails');
+		}
+		
+		if (isset($this->request->post['config_manager_email'])) {
+			$this->data['config_manager_email'] = $this->request->post['config_manager_email'];
+		} else {
+			$this->data['config_manager_email'] = $this->config->get('config_manager_email');
 		}
 
 		if (isset($this->request->post['config_fraud_detection'])) {

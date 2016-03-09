@@ -19,7 +19,11 @@
         <?php echo $text_fax; ?> <?php echo $order['store_fax']; ?><br />
         <?php } ?>
         <?php echo $order['store_email']; ?><br />
-        <?php echo $order['store_url']; ?></td>
+        <?php echo $order['store_url']; ?>
+		<?if($order['manager_info']){?>
+		<br><?php echo $entry_manager; ?> <?php echo $order['manager_info']; ?>
+		<?php }?>
+		</td>
       <td align="right" valign="top"><table>
           <tr>
             <td><b><?php echo $text_date_added; ?></b></td>

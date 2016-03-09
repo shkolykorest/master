@@ -276,6 +276,7 @@ class ControllerUserUser extends Controller {
 		$this->data['entry_firstname'] = $this->language->get('entry_firstname');
 		$this->data['entry_lastname'] = $this->language->get('entry_lastname');
 		$this->data['entry_email'] = $this->language->get('entry_email');
+		$this->data['entry_phode'] = $this->language->get('entry_phode');
 		$this->data['entry_user_group'] = $this->language->get('entry_user_group');
 		$this->data['entry_status'] = $this->language->get('entry_status');
 		$this->data['entry_captcha'] = $this->language->get('entry_captcha');
@@ -401,6 +402,14 @@ class ControllerUserUser extends Controller {
 			$this->data['email'] = $user_info['email'];
 		} else {
 			$this->data['email'] = '';
+		}
+		
+		if (isset($this->request->post['phone'])) {
+			$this->data['phone'] = $this->request->post['phone'];
+		} elseif (!empty($user_info)) {
+			$this->data['phone'] = $user_info['phone'];
+		} else {
+			$this->data['phone'] = '';
 		}
 
 		if (isset($this->request->post['user_group_id'])) {

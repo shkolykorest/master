@@ -4,6 +4,7 @@ $_['heading_title']                           = 'Orders';
 
 // Text
 
+$_['subject_manager_email']                    = 'Ваш персональный менеджер';
 $_['text_amazon_order_id']                    = 'Amazon Order ID:';
 $_['text_name']                               = 'Name:';
 $_['text_success']                            = 'Success: You have modified orders!';
@@ -137,6 +138,7 @@ $_['column_notify']                           = 'Customer Notified';
 $_['column_action']                           = 'Action';
 
 // Entry
+$_['entry_manager']                           = 'Personal manager:';
 $_['entry_store']                             = 'Store:';
 $_['entry_customer']                          = 'Customer:';
 $_['entry_customer_group']                    = 'Customer Group:';

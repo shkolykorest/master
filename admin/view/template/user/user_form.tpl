@@ -41,6 +41,10 @@
             <td><?php echo $entry_email; ?></td>
             <td><input type="text" name="email" value="<?php echo $email; ?>" /></td>
           </tr>
+		  <tr>
+            <td><?php echo $entry_phode; ?></td>
+            <td><input type="text" name="phone" value="<?php echo $phone; ?>" /></td>
+          </tr>
           <tr>
             <td><?php echo $entry_user_group; ?></td>
             <td><select name="user_group_id">
