@@ -103,13 +103,13 @@
 					<?php } ?>
 			  <?php }else{?>
 			  <select class="order_manager" name="manager">
-                  <option data-cid="<?php echo $order['customer_id'];?>" value="0">Select manager</option>      
+                  <option data-cid="0" value="0">Select manager</option>      
 					<?php foreach ($manager as $v) { ?>
 					  <?php if($v['user_group_id']!=10) continue;?>
 						 <?php if($v['user_id']==$order['manager_id']) {?>
-							<option data-cid="<?php echo $order['customer_id'];?>" value="<?php echo $v['user_id']; ?>" selected="selected"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>
+							<option data-cid="<?php echo $order['customer_email'];?>" value="<?php echo $v['user_id']; ?>" selected="selected"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>
 						 <?php }else{?>
-							<option data-cid="<?php echo $order['customer_id'];?>" value="<?php echo $v['user_id']; ?>"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>	
+							<option data-cid="<?php echo $order['customer_email'];?>" value="<?php echo $v['user_id']; ?>"><?php echo $v['firstname'].' '.$v['lastname']; ?></option>	
 						 <?php } ?>
 					<?php } ?>
 			  </select>	

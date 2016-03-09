@@ -327,14 +327,19 @@ class ControllerSaleOrder extends Controller {
 					'href' => $this->url->link('sale/order/update', 'token=' . $this->session->data['token'] . '&order_id=' . $result['order_id'] . $url, 'SSL')
 				);
 			}
+			$manager_id=false;
+			$orderManager = $this->model_sale_order->getOrderManager($result['email']);
+			if($orderManager){
+				$manager_id=(int)$orderManager['manager_id'];
+			}
 
 			
 			$this->data['orders'][] = array(
 				'order_id'      => $result['order_id'],
 				'customer'      => $result['customer'],
-				'customer_id'      => $result['customer_id'],
+				'customer_email'      => $result['email'],
 				'status'        => $result['status'],
-				'manager_id'        => $result['manager_id'],
+				'manager_id'        => $manager_id,
 				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added'    => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'date_modified' => date($this->language->get('date_format_short'), strtotime($result['date_modified'])),
@@ -2601,13 +2606,9 @@ class ControllerSaleOrder extends Controller {
 				$this->load->model('sale/customer');
 				$this->language->load('sale/order');
 				
-				$cid=(int)$this->request->get['cid'];
-				$mid=(int)$this->request->get['mid'];			
-				
+				$customer_email=$this->request->get['cid'];
+				$mid=(int)$this->request->get['mid'];							
 				$manager_info= $this->model_user_user->getUser($mid);	
-				$customer_info = $this->model_sale_customer->getCustomer($cid);
-				
-				
 				$find = array('{firstname}','{lastname}','{phone}','{email}');
 				$replace = array('firstname' => '','lastname'  => '','phone'  => '','email'=>'');				
 				if(!empty($manager_info['firstname'])){
@@ -2633,7 +2634,7 @@ class ControllerSaleOrder extends Controller {
 				$mail->password = $this->config->get('config_smtp_password');
 				$mail->port = $this->config->get('config_smtp_port');
 				$mail->timeout = $this->config->get('config_smtp_timeout');
-				$mail->setTo($customer_info['email']);
+				$mail->setTo($customer_email);
 				$mail->setFrom($this->config->get('config_email'));
 				$mail->setSender('store_name');
 				$mail->setSubject(html_entity_decode($subject, ENT_QUOTES, 'UTF-8'));
